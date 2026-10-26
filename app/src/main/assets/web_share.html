@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LocalSend Web Share</title>
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-hover: #0f766e;
+      --primary-light: rgba(13, 148, 136, 0.15);
+      --accent: #14b8a6;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --error: #ef4444;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 580px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(20, 184, 166, 0.35);
+    }
+
+    .logo-badge svg {
+      width: 24px;
+      height: 24px;
+      fill: #ffffff;
+    }
+
+    .header-info h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .header-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* Tabs */
+    .tabs-nav {
+      display: flex;
+      background: #141f33;
+      padding: 4px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      border: 1px solid var(--card-border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.4);
+    }
+
+    /* Tab Content Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed rgba(20, 184, 166, 0.35);
+      border-radius: 14px;
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(13, 148, 136, 0.04);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(20, 184, 166, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .dropzone-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      fill: var(--accent);
+      opacity: 0.9;
+    }
+
+    .dropzone p {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .dropzone span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* File Queue List */
+    .file-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #141f33;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+
+    .file-item-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .file-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+
+    .file-item-size {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .btn-remove:hover {
+      color: var(--error);
+    }
+
+    /* Upload Progress */
+    .progress-wrap {
+      margin-top: 14px;
+      display: none;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #141f33;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      transition: width 0.15s ease;
+      border-radius: 8px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Main Submit Button */
+    .btn-primary {
+      width: 100%;
+      margin-top: 16px;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Quick Text Area */
+    .text-input {
+      width: 100%;
+      height: 90px;
+      background: #141f33;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--text-main);
+      font-size: 14px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+    }
+
+    /* Download Card in Tab 2 */
+    .download-box {
+      text-align: center;
+      padding: 24px 16px;
+    }
+
+    .file-badge-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: rgba(20, 184, 166, 0.15);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(20, 184, 166, 0.3);
+    }
+
+    .file-badge-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--accent);
+    }
+
+    .download-filename {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      word-break: break-all;
+      margin-bottom: 6px;
+    }
+
+    .download-filesize {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 16px;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 14px;
+      opacity: 0.4;
+      fill: var(--text-muted);
+    }
+
+    .empty-state h3 {
+      font-size: 15px;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: #064e3b;
+      color: #a7f3d0;
+    }
+
+    .toast.error {
+      border-color: rgba(239, 68, 68, 0.5);
+      background: #7f1d1d;
+      color: #fecaca;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo-badge">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <div class="header-info">
+          <h1 id="deviceAlias">{{DEVICE_ALIAS}}</h1>
+          <p id="deviceSub">Android {{DEVICE_MODEL}} • Port {{PORT}}</p>
+        </div>
+      </div>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span>Đã kết nối</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" id="tabUploadBtn" onclick="switchTab('upload')">
+        <span>📤 Gửi tới Android</span>
+      </button>
+      <button class="tab-btn" id="tabDownloadBtn" onclick="switchTab('download')">
+        <span>📥 Tải từ Android</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: UPLOAD VIEW -->
+    <div id="uploadTab">
+      <!-- File Transfer Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>📁 Gửi Tệp tin / Hình ảnh</span>
+        </div>
+        <div class="card-subtitle">Hỗ trợ ảnh, video, tài liệu không giới hạn kích thước từ Safari.</div>
+
+        <!-- Hidden inputs for file & camera -->
+        <input type="file" id="filePicker" multiple style="display:none;" onchange="handleFileSelect(event)">
+        <input type="file" id="mediaPicker" accept="image/*,video/*" multiple style="display:none;" onchange="handleFileSelect(event)">
+
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('filePicker').click()">
+          <svg class="dropzone-icon" viewBox="0 0 24 24">
+            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+          </svg>
+          <p>Nhấn hoặc kéo thả tệp vào đây</p>
+          <span>Safari trên iPhone: có thể chọn Ảnh hoặc Tệp trong Files</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-action" onclick="document.getElementById('filePicker').click()">
+            <span>📄 Chọn Tệp</span>
+          </button>
+          <button class="btn-action" onclick="document.getElementById('mediaPicker').click()">
+            <span>📸 Chọn Ảnh / Video</span>
+          </button>
+        </div>
+
+        <!-- Selected Files List -->
+        <div class="file-list" id="fileList"></div>
+
+        <!-- Upload Progress Bar -->
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+          <div class="progress-label">
+            <span id="progressStatus">Đang gửi...</span>
+            <span id="progressPercent">0%</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="btnUpload" disabled onclick="startUpload()">
+          <span>🚀 Gửi Tệp Tới Điện Thoại</span>
+        </button>
+      </div>
+
+      <!-- Quick Text Message Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>💬 Gửi Tin Nhắn / Văn Bản / Link</span>
+        </div>
+        <div class="card-subtitle">Hiển thị thông báo và sao chép nhanh trên Android.</div>
+
+        <textarea class="text-input" id="textInput" placeholder="Nhập tin nhắn, link website hoặc nội dung ghi chú..."></textarea>
+        
+        <button class="btn-primary" style="margin-top: 12px;" onclick="sendQuickText()">
+          <span>📨 Gửi Ngay</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 2: DOWNLOAD VIEW -->
+    <div id="downloadTab" style="display: none;">
+      <div class="card">
+        <div class="card-title">
+          <span>📥 Tệp Đang Chia Sẻ Từ Điện Thoại</span>
+        </div>
+        <div class="card-subtitle">Tải trực tiếp các tệp mà điện thoại Android gửi cho bạn.</div>
+
+        <div id="sharedFileBox">
+          <div class="empty-state">
+            <svg class="empty-icon" viewBox="0 0 24 24">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            <h3>Chưa có tệp nào sẵn sàng</h3>
+            <p>Mở ứng dụng trên điện thoại Android, vào mục <b>"Gửi"</b> và chọn một tệp (ảnh, video, file). Tệp sẽ xuất hiện ở đây để tải về!</p>
+            <button class="btn-action" style="margin: 16px auto 0; max-width: 200px;" onclick="checkStatus()">
+              <span>🔄 Làm mới</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      LocalSend Web Share • Truyền file tốc độ cao trong mạng nội bộ
+    </div>
+  </div>
+
+  <!-- Toast Element -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let selectedFiles = [];
+    let isUploading = false;
+    let pollTimer = null;
+
+    function switchTab(tab) {
+      const uploadTab = document.getElementById('uploadTab');
+      const downloadTab = document.getElementById('downloadTab');
+      const tabUploadBtn = document.getElementById('tabUploadBtn');
+      const tabDownloadBtn = document.getElementById('tabDownloadBtn');
+
+      if (tab === 'upload') {
+        uploadTab.style.display = 'block';
+        downloadTab.style.display = 'none';
+        tabUploadBtn.classList.add('active');
+        tabDownloadBtn.classList.remove('active');
+      } else {
+        uploadTab.style.display = 'none';
+        downloadTab.style.display = 'block';
+        tabUploadBtn.classList.remove('active');
+        tabDownloadBtn.classList.add('active');
+        checkStatus();
+      }
+    }
+
+    // Drag and drop support
+    const dropzone = document.getElementById('dropzone');
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      if (dt && dt.files && dt.files.length > 0) {
+        addFiles(Array.from(dt.files));
+      }
+    });
+
+    function handleFileSelect(e) {
+      if (e.target.files && e.target.files.length > 0) {
+        addFiles(Array.from(e.target.files));
+        e.target.value = '';
+      }
+    }
+
+    function addFiles(files) {
+      for (const f of files) {
+        selectedFiles.push(f);
+      }
+      renderFileList();
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      renderFileList();
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function renderFileList() {
+      const list = document.getElementById('fileList');
+      const btnUpload = document.getElementById('btnUpload');
+      list.innerHTML = '';
+
+      if (selectedFiles.length === 0) {
+        btnUpload.disabled = true;
+        btnUpload.innerHTML = '<span>🚀 Gửi Tệp Tới Điện Thoại</span>';
+        return;
+      }
+
+      btnUpload.disabled = isUploading;
+      btnUpload.innerHTML = `<span>🚀 Gửi ${selectedFiles.length} Tệp Tới Điện Thoại</span>`;
+
+      selectedFiles.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `
+          <div class="file-item-info">
+            <span>📄</span>
+            <div>
+              <div class="file-item-name" title="${file.name}">${file.name}</div>
+              <div class="file-item-size">${formatBytes(file.size)}</div>
+            </div>
+          </div>
+          <button class="btn-remove" onclick="removeFile(${index})" ${isUploading ? 'disabled' : ''}>✕</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    async function startUpload() {
+      if (selectedFiles.length === 0 || isUploading) return;
+      isUploading = true;
+      document.getElementById('btnUpload').disabled = true;
+      const progressWrap = document.getElementById('progressWrap');
+      const progressBar = document.getElementById('progressBar');
+      const progressStatus = document.getElementById('progressStatus');
+      const progressPercent = document.getElementById('progressPercent');
+      progressWrap.style.display = 'block';
+
+      const totalFiles = selectedFiles.length;
+      let successCount = 0;
+
+      for (let i = 0; i < totalFiles; i++) {
+        const file = selectedFiles[i];
+        progressStatus.textContent = `Đang gửi (${i + 1}/${totalFiles}): ${file.name}`;
+        
+        try {
+          await uploadSingleFile(file, (percent) => {
+            progressBar.style.width = percent + '%';
+            progressPercent.textContent = percent + '%';
+          });
+          successCount++;
+        } catch (err) {
+          showToast(`Lỗi khi gửi tệp: ${file.name}`, 'error');
+        }
+      }
+
+      isUploading = false;
+      progressWrap.style.display = 'none';
+      progressBar.style.width = '0%';
+      selectedFiles = [];
+      renderFileList();
+
+      if (successCount > 0) {
+        showToast(`✓ Đã gửi thành công ${successCount} tệp tới điện thoại!`, 'success');
+      }
+    }
+
+    function uploadSingleFile(file, onProgress) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const url = `/api/web/upload?name=${encodeURIComponent(file.name)}`;
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            onProgress(percent);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.responseText);
+          } else {
+            reject(new Error(`Server error: ${xhr.status}`));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Network error'));
+        xhr.send(file);
+      });
+    }
+
+    async function sendQuickText() {
+      const input = document.getElementById('textInput');
+      const text = input.value.trim();
+      if (!text) {
+        showToast('Vui lòng nhập nội dung cần gửi!', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/web/send-text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text })
+        });
+
+        if (res.ok) {
+          input.value = '';
+          showToast('✓ Đã gửi tin nhắn tới Android!', 'success');
+        } else {
+          showToast('Không thể gửi tin nhắn!', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi mạng khi gửi tin nhắn!', 'error');
+      }
+    }
+
+    async function checkStatus() {
+      try {
+        const res = await fetch('/api/web/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.alias) {
+            document.getElementById('deviceAlias').textContent = data.alias;
+          }
+          if (data.model) {
+            document.getElementById('deviceSub').textContent = `Android ${data.model} • LocalSend Web`;
+          }
+
+          const box = document.getElementById('sharedFileBox');
+          if (data.sharedFile) {
+            box.innerHTML = `
+              <div class="download-box">
+                <div class="file-badge-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                  </svg>
+                </div>
+                <div class="download-filename">${data.sharedFile.name}</div>
+                <div class="download-filesize">${data.sharedFile.formattedSize || ''}</div>
+                <a href="/api/web/download" download class="btn-primary" style="text-decoration:none; max-width:320px; margin:0 auto;">
+                  <span>⬇ Tải Về Máy Ngay</span>
+                </a>
+              </div>
+            `;
+          } else {
+            box.innerHTML = `
+              <div class="empty-state">
+                <svg class="empty-icon" viewBox="0 0 24 24">
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                <h3>Chưa có tệp nào sẵn sàng</h3>
+                <p>Mở ứng dụng trên điện thoại Android, vào mục <b>"Gửi"</b> và chọn một tệp (ảnh, video, file). Tệp sẽ xuất hiện ở đây để tải về!</p>
+                <button class="btn-action" style="margin: 16px auto 0; max-width: 200px;" onclick="checkStatus()">
+                  <span>🔄 Làm mới</span>
+                </button>
+              </div>
+            `;
+          }
+        }
+      } catch (e) {
+        console.log('Error checking status', e);
+      }
+    }
+
+    function showToast(msg, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = `toast show ${type}`;
+      setTimeout(() => {
+        toast.className = 'toast';
+      }, 3500);
+    }
+
+    // Polling status every 4s
+    pollTimer = setInterval(checkStatus, 4000);
+    checkStatus();
+  </script>
+</body>
+</html>

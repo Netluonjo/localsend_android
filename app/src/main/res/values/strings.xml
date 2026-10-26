@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">LocalSend</string>
+    <string name="tab_receive">Nhận</string>
+    <string name="tab_send">Gửi</string>
+    <string name="tab_settings">Cài đặt</string>
+
+    <string name="status_ready">Sẵn sàng nhận dữ liệu</string>
+    <string name="status_subtitle">Các thiết bị cùng Wi-Fi có thể nhìn thấy bạn</string>
+    <string name="send_title">Gửi tệp &amp; Văn bản</string>
+    <string name="action_send_files">Chọn Tệp Tin</string>
+    <string name="action_send_text">Gửi Tin Nhắn / Text</string>
+    <string name="nearby_devices">Thiết bị trong mạng LAN</string>
+    <string name="no_devices_found">Đang quét mạng Wi-Fi tìm thiết bị...</string>
+    <string name="history_title">Lịch sử truyền nhận</string>
+    <string name="no_history">Chưa có lịch sử truyền file nào</string>
+</resources>
